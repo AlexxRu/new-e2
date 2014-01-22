@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# lirc daemon
+# chkconfig: S 36 80
+#
+PID=/var/run/lirc/lircd.pid
+
+[ -e /dev/lirc ] || ln -s lirc0 /dev/lirc
+[ -d /var/run/lirc ] || mkdir -p /var/run/lirc
+
+case $1 in
+	start)
+		echo "Starting lircd..."
+		/usr/bin/lircd /etc/lircd.conf
+		start-stop-daemon -S -b -x /bin/evremote2
+		;;
+	stop)
+		echo "Stopping lircd..."
+		start-stop-daemon -K -x /bin/evremote2
+		kill -TERM `cat $PID`
+		;;
+	restart)
+		echo "Restarting lircd... "
+		$0 stop
+		$0 start
+		;;
+	*)
+		echo   "usage:	$0 <start|stop|restart>"
+		exit 1
+		;;
+esac
